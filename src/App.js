@@ -12,15 +12,21 @@ import { auth } from './firebase';
 
 function App() {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setUser(user);
+      setLoading(false);
     });
 
     // Clean up the subscription
     return () => unsubscribe();
   }, []);
+
+  if (loading) {
+    return <div>Loading...</div>; // Add a loading indicator while checking authentication state
+  }
 
   return (
     <Router>
@@ -28,6 +34,11 @@ function App() {
         <Header />
         <main className="flex-grow container mx-auto p-4">
           <Routes>
+            {/* Route for Login */}
+            <Route path="/login" element={<Login />} />
+            {/* Route for Signup */}
+            <Route path="/signup" element={<Signup />} />
+            {/* Protected routes */}
             {user ? (
               <>
                 <Route path="/" element={<ProtectedRoute element={TripList} />} />
@@ -36,11 +47,7 @@ function App() {
                 <Route path="*" element={<Navigate to="/" />} />
               </>
             ) : (
-              <>
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="*" element={<Navigate to="/login" />} />
-              </>
+              <Route path="*" element={<Navigate to="/login" />} />
             )}
           </Routes>
         </main>

@@ -1,26 +1,32 @@
-// src/components/Signup.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
 
 function Signup() {
+  // Initial state for the signup form
   const initialCredentials = { email: '', password: '' };
   const [credentials, setCredentials] = useState(initialCredentials);
   const navigate = useNavigate();
 
+  // Handle input field changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setCredentials({ ...credentials, [name]: value });
   };
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Create a new user with email and password using Firebase Auth
       await createUserWithEmailAndPassword(auth, credentials.email, credentials.password);
+      // Reset form fields
       setCredentials(initialCredentials);
+      // Redirect to home page after successful signup
       navigate('/');
     } catch (error) {
+      // Show alert on error
       alert('Failed to create an account');
     }
   };
