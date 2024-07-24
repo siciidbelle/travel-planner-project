@@ -1,22 +1,23 @@
-// src/components/TripList.js
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { onSnapshot, collection } from 'firebase/firestore';
-import { db } from '../firebase';
 
 function TripList() {
+  // State to hold the list of trips
   const [trips, setTrips] = useState([]);
   const navigate = useNavigate();
 
+  // Load trips from local storage on component mount
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, 'trips'), (snapshot) => {
-      const tripsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setTrips(tripsData);
-    });
+    const isAuthenticated = localStorage.getItem('isAuthenticated');
+    if (!isAuthenticated) {
+      navigate('/login');
+    } else {
+      let trips = JSON.parse(localStorage.getItem('trips')) || [];
+      setTrips(trips);
+    }
+  }, [navigate]);
 
-    return () => unsubscribe();
-  }, []);
-
+  // Handle logout action
   const handleLogout = () => {
     localStorage.removeItem('isAuthenticated');
     navigate('/login');
@@ -30,10 +31,10 @@ function TripList() {
         <button onClick={handleLogout} className="bg-red-500 text-white p-2 rounded-lg">Logout</button>
       </div>
       <ul className="space-y-4">
-        {trips.map((trip) => (
-          <li key={trip.id} className="p-4 border rounded-lg shadow-sm flex justify-between items-center">
-            <Link to={`/trip/${trip.id}`} className="text-blue-500">{trip.destination}</Link>
-            <Link to={`/update-trip/${trip.id}`} className="bg-yellow-500 text-white p-2 rounded-lg">Edit</Link>
+        {trips.map((trip, index) => (
+          <li key={index} className="p-4 border rounded-lg shadow-sm flex justify-between items-center">
+            <Link to={`/trip/${index}`} className="text-blue-500">{trip.destination}</Link>
+            <Link to={`/update-trip/${index}`} className="bg-yellow-500 text-white p-2 rounded-lg">Edit</Link>
           </li>
         ))}
       </ul>

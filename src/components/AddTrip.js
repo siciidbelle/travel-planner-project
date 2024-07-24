@@ -1,8 +1,5 @@
-// src/components/AddTrip.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { collection, addDoc } from 'firebase/firestore';
-import { db } from '../firebase';
 
 function AddTrip() {
   const initialTripState = { destination: '', date: '', description: '' };
@@ -14,15 +11,14 @@ function AddTrip() {
     setTrip({ ...trip, [name]: value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    try {
-      await addDoc(collection(db, 'trips'), trip);
-      setTrip(initialTripState);
-      navigate('/');
-    } catch (error) {
-      alert('Failed to add trip');
-    }
+    let trips = JSON.parse(localStorage.getItem('trips')) || [];
+    trips.push(trip);
+    localStorage.setItem('trips', JSON.stringify(trips));
+    const newTripId = trips.length - 1; // get the id of the newly added trip
+    setTrip(initialTripState);
+    navigate(`/trip/${newTripId}`); // navigate to the details of the newly added trip
   };
 
   return (

@@ -1,4 +1,3 @@
-// src/components/UpdateTrip.js
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
@@ -11,12 +10,18 @@ function UpdateTrip() {
 
   useEffect(() => {
     const fetchTrip = async () => {
-      const docRef = doc(db, 'trips', id);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        setTrip(docSnap.data());
-      } else {
-        navigate('/');
+      try {
+        const docRef = doc(db, 'trips', id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setTrip(docSnap.data());
+        } else {
+          console.log('No such document!');
+          navigate('/'); // Redirect if trip is not found
+        }
+      } catch (error) {
+        console.error('Error fetching trip:', error);
+        navigate('/'); // Redirect on error
       }
     };
 
@@ -30,9 +35,13 @@ function UpdateTrip() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const docRef = doc(db, 'trips', id);
-    await updateDoc(docRef, trip);
-    navigate('/');
+    try {
+      const docRef = doc(db, 'trips', id);
+      await updateDoc(docRef, trip);
+      navigate('/');
+    } catch (error) {
+      alert('Failed to update trip');
+    }
   };
 
   return (
