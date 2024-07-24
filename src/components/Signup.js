@@ -1,10 +1,10 @@
-// src/components/Login.js
+// src/components/Signup.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
 
-function Login() {
+function Signup() {
   const initialCredentials = { email: '', password: '' };
   const [credentials, setCredentials] = useState(initialCredentials);
   const navigate = useNavigate();
@@ -17,18 +17,18 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await signInWithEmailAndPassword(auth, credentials.email, credentials.password);
+      await createUserWithEmailAndPassword(auth, credentials.email, credentials.password);
       setCredentials(initialCredentials);
       navigate('/');
     } catch (error) {
-      alert('Invalid email or password');
+      alert('Failed to create an account');
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-md max-w-md mx-auto">
-        <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center">Signup</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="email"
@@ -49,7 +49,7 @@ function Login() {
             className="w-full p-2 border rounded-lg"
           />
           <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded-lg">
-            Login
+            Signup
           </button>
         </form>
       </div>
@@ -57,4 +57,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default Signup;

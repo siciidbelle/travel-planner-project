@@ -1,12 +1,26 @@
-import React from 'react';
+// src/components/TripDetails.js
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../firebase';
 
 function TripDetails() {
   const { id } = useParams();
-  // Retrieve trips from local storage
-  const trips = JSON.parse(localStorage.getItem('trips')) || [];
-  // Get the specific trip details based on the id
-  const trip = trips[id];
+  const [trip, setTrip] = useState(null);
+
+  useEffect(() => {
+    const fetchTrip = async () => {
+      const docRef = doc(db, 'trips', id);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setTrip(docSnap.data());
+      } else {
+        console.log('No such document!');
+      }
+    };
+
+    fetchTrip();
+  }, [id]);
 
   return (
     <div className="bg-white p-8 rounded-lg shadow-md max-w-md mx-auto">
@@ -19,7 +33,7 @@ function TripDetails() {
           <Link to="/" className="block text-center bg-blue-500 text-white p-2 rounded-lg">Back to List</Link>
         </div>
       ) : (
-        <p className="text-center">Trip not found</p>
+        <p className="text-center">Loading...</p>
       )}
     </div>
   );

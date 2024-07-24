@@ -1,37 +1,37 @@
+// src/components/UpdateTrip.js
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { db } from '../firebase';
 
 function UpdateTrip() {
   const { id } = useParams();
   const navigate = useNavigate();
-  // Retrieve trips from local storage
-  const trips = JSON.parse(localStorage.getItem('trips')) || [];
-  // State to hold the current trip details
   const [trip, setTrip] = useState({ destination: '', date: '', description: '' });
 
-  // Load the current trip details on component mount
   useEffect(() => {
-    if (trips[id]) {
-      setTrip(trips[id]);
-    } else {
-      navigate('/');
-    }
-  }, [id, trips, navigate]);
+    const fetchTrip = async () => {
+      const docRef = doc(db, 'trips', id);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setTrip(docSnap.data());
+      } else {
+        navigate('/');
+      }
+    };
 
-  // Handle input change
+    fetchTrip();
+  }, [id, navigate]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setTrip({ ...trip, [name]: value });
   };
 
-  // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Update the trip in the list
-    trips[id] = trip;
-    // Save updated trips to local storage
-    localStorage.setItem('trips', JSON.stringify(trips));
-    // Navigate back to trip list
+    const docRef = doc(db, 'trips', id);
+    await updateDoc(docRef, trip);
     navigate('/');
   };
 

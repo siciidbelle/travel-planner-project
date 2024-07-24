@@ -1,31 +1,28 @@
+// src/components/AddTrip.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { collection, addDoc } from 'firebase/firestore';
+import { db } from '../firebase';
 
 function AddTrip() {
-  // Initial state for the trip form
   const initialTripState = { destination: '', date: '', description: '' };
   const [trip, setTrip] = useState(initialTripState);
   const navigate = useNavigate();
 
-  // Handle input change
   const handleChange = (e) => {
     const { name, value } = e.target;
     setTrip({ ...trip, [name]: value });
   };
 
-  // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Retrieve trips from local storage
-    let trips = JSON.parse(localStorage.getItem('trips')) || [];
-    // Add new trip to the list
-    trips.push(trip);
-    // Save updated trips to local storage
-    localStorage.setItem('trips', JSON.stringify(trips));
-    // Reset form fields
-    setTrip(initialTripState);
-    // Navigate back to trip list
-    navigate('/');
+    try {
+      await addDoc(collection(db, 'trips'), trip);
+      setTrip(initialTripState);
+      navigate('/');
+    } catch (error) {
+      alert('Failed to add trip');
+    }
   };
 
   return (
