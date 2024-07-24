@@ -1,15 +1,12 @@
 // src/components/ProtectedRoute.js
 import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
+import { auth } from '../firebase';
 
-const ProtectedRoute = ({ element: Element, isAuthenticated }) => {
-  const location = useLocation();
+const ProtectedRoute = ({ element: Component, ...rest }) => {
+  const user = auth.currentUser;
 
-  return isAuthenticated ? (
-    <Element />
-  ) : (
-    <Navigate to="/login" state={{ from: location }} replace />
-  );
+  return user ? <Component {...rest} /> : <Navigate to="/login" />;
 };
 
 export default ProtectedRoute;

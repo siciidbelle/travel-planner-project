@@ -1,93 +1,49 @@
-// src/App.js
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { onAuthStateChanged } from 'firebase/auth';
 import AddTrip from './components/AddTrip';
-import TripList from './components/TripList';
 import TripDetails from './components/TripDetails';
-import UpdateTrip from './components/UpdateTrip';
-import Login from './components/Login';
-import Signup from './components/Signup';
+import TripList from './components/TripList';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import Login from './components/Login';
+import Signup from './components/Signup';
+import ProtectedRoute from './components/ProtectedRoute'; // Ensure the correct path
 import { auth } from './firebase';
-import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setIsAuthenticated(!!user);
-      setLoading(false);
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setUser(user);
     });
 
+    // Clean up the subscription
     return () => unsubscribe();
   }, []);
 
-  if (loading) {
-    // Optional: display a loading spinner or similar
-    return <div>Loading...</div>;
-  }
-
   return (
     <Router>
-      <div className="min-h-screen bg-gray-100 flex flex-col">
+      <div className="flex flex-col min-h-screen">
         <Header />
-        <div className="flex-grow container mx-auto p-4">
+        <main className="flex-grow container mx-auto p-4">
           <Routes>
-            <Route
-              path="/"
-              element={
-                isAuthenticated ? (
-                  <ProtectedRoute element={TripList} isAuthenticated={isAuthenticated} />
-                ) : (
-                  <Navigate to="/login" />
-                )
-              }
-            />
-            <Route
-              path="/add-trip"
-              element={
-                isAuthenticated ? (
-                  <ProtectedRoute element={AddTrip} isAuthenticated={isAuthenticated} />
-                ) : (
-                  <Navigate to="/login" />
-                )
-              }
-            />
-            <Route
-              path="/trip/:id"
-              element={
-                isAuthenticated ? (
-                  <ProtectedRoute element={TripDetails} isAuthenticated={isAuthenticated} />
-                ) : (
-                  <Navigate to="/login" />
-                )
-              }
-            />
-            <Route
-              path="/update-trip/:id"
-              element={
-                isAuthenticated ? (
-                  <ProtectedRoute element={UpdateTrip} isAuthenticated={isAuthenticated} />
-                ) : (
-                  <Navigate to="/login" />
-                )
-              }
-            />
-            <Route
-              path="/login"
-              element={!isAuthenticated ? <Login /> : <Navigate to="/" />}
-            />
-            <Route
-              path="/signup"
-              element={!isAuthenticated ? <Signup /> : <Navigate to="/" />}
-            />
-            <Route path="*" element={<Navigate to={isAuthenticated ? "/" : "/login"} />} />
+            {user ? (
+              <>
+                <Route path="/" element={<ProtectedRoute element={TripList} />} />
+                <Route path="/add-trip" element={<ProtectedRoute element={AddTrip} />} />
+                <Route path="/trip/:id" element={<ProtectedRoute element={TripDetails} />} />
+                <Route path="*" element={<Navigate to="/" />} />
+              </>
+            ) : (
+              <>
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="*" element={<Navigate to="/login" />} />
+              </>
+            )}
           </Routes>
-        </div>
+        </main>
         <Footer />
       </div>
     </Router>
